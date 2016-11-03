@@ -37,3 +37,4 @@ Composite pattern is the main structure in this project. We designed a abstract 
 
 2. When we test our program with the case "echo a; efh p && ; || exit", command "echo a" will be executed successfully and command "efh p" will print "command not found". Then there is a fault message "segmentation fault", then command "exit" could also be executed successfully.
 
+3. There is a little problem with the input "&". If we want to input "&&", but we input "&" wrongly, then the program will skip the character "&".
