@@ -4,7 +4,7 @@ BINDIR = bin
 EXECUTABLE = rshell
 
 CC = g++
-CFLAGS = -c -Wall -Werror -ansi -pedantic -std=c++11 -I$(INCLUDEDIR)/
+CFLAGS = -c -Wall -Werror -ansi -pedantic -I$(INCLUDEDIR)/
 LDFLAGS = 
 
 
