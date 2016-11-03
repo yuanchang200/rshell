@@ -1,0 +1,5 @@
+name1=Chang Yuan
+ucrnetid1=cyuan004
+name2=Yuanxi Fu
+ucrnetid2=yfu010
+repour1=https://github.com/yuanchang200/rshell.git
