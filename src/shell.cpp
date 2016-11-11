@@ -1,32 +1,127 @@
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <iostream>
 #include <stack>
 #include <vector>
 #include <queue>
 #include <unistd.h>
 #include <wait.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <pwd.h>
+#include <grp.h>
+#include <time.h>
+#include <iomanip>
+#include <map>
+#include <algorithm>
 #include <stdlib.h>
+#include <dirent.h>
+#include <errno.h>
 #include <string>
 #include <string.h>
+#include <cctype>
+#include <cstdlib>
 using namespace std;
+
 int flag = 0;//flag = 0 means a single command is executed successfully.
 int exit_flag = 0;//This is for command "exit" appeared in a composition, exit_flag = 1 means it's time to exit
 class Executor {
 public:
 	void execute(char *argv[]) {
-		int child_ret;
-		pid_t pid;
-		pid = fork();//create a child
-		if (pid == 0) {//child
-			execvp(argv[0], argv);
-			cout << "command not found" << endl;
-			exit(-1);
+
+		if (strcmp(argv[0], "test") == 0 || strcmp(argv[0], "[") == 0) {
+			struct stat sb;
+			if (*argv[1] == '-') {
+				if (strcmp(argv[1], "-f") == 0) {
+					int i = 2;
+					while ((strcmp(argv[i], "]") != 0) && (strcmp(argv[i], "\0") != 0)) {
+						if (stat(argv[i], &sb) == -1)
+						{
+							perror("stat");
+						}
+						if (S_ISREG(sb.st_mode))
+						{
+							cout << "(True)" << endl;
+						}
+						else {
+							cout << "(False)" << endl;
+						}
+						i++;
+					}
+				}
+				else if (strcmp(argv[1], "-d") == 0) {
+					int i = 2;
+					while ((strcmp(argv[i], "]") != 0) && (strcmp(argv[i], "\0") != 0)) {
+						if (stat(argv[i], &sb) == -1)
+						{
+							perror("stat");
+						}
+						if (S_ISDIR(sb.st_mode))
+						{
+							cout << "(True)" << endl;
+						}
+						else {
+							cout << "(False)" << endl;
+						}
+						i++;
+					}
+					
+				}
+				else if (strcmp(argv[1], "-e") == 0) {
+					int i = 2;
+					while ((strcmp(argv[i], "]") != 0) && (strcmp(argv[i], "\0") != 0)) {
+						if (stat(argv[i], &sb) == -1)
+						{
+							perror("stat");
+						}
+						if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))
+						{
+							cout << "(True)" << endl;
+						}
+						else {
+							cout << "(False)" << endl;
+						}
+						i++;
+					}	
+				}
+				else {
+					cout << "\"" << argv[1] << "\"" << "can not be identified" << endl;
+				}
+			}
+			else {
+				int i = 1;
+				while ((strcmp(argv[i], "]") != 0) && (strcmp(argv[i], "\0") != 0)) {
+					if (stat(argv[i], &sb) == -1)
+					{
+						perror("stat");
+					}
+					if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))
+					{
+						cout << "(True)" << endl;
+					}
+					else {
+						cout << "(False)" << endl;
+					}
+					i++;
+				}
+			}
 		}
-		else if (pid > 0) {//parent
-			wait(&child_ret);
-			flag = WEXITSTATUS(child_ret);//get the value of what the child returned, if flag!=0,
-		}                                 // then the command has not been executed successfully
 		else {
-			cout << "fork error" << endl;
+			int child_ret;
+			pid_t pid;
+			pid = fork();//create a child
+			if (pid == 0) {//child
+				execvp(argv[0], argv);
+				cout << "command not found" << endl;
+				exit(-1);
+			}
+			else if (pid > 0) {//parent
+				wait(&child_ret);
+				flag = WEXITSTATUS(child_ret);//get the value of what the child returned, if flag!=0,
+			}                                 // then the command has not been executed successfully
+			else {
+				cout << "fork error" << endl;
+			}
 		}
 	}
 };
@@ -104,6 +199,34 @@ public:
 	}
 };
 
+class Parenthesis :public Base {
+protected:
+	vector<Base*> commd;
+public:
+	void addNode(Base* Node) {
+		commd.push_back(Node);
+	}
+	void removeNode(Base* Node) {
+		for (int i = 0; i < (int)commd.size(); i++) {
+			if (commd.at(i) == Node) {
+				commd.erase(commd.begin() + i);
+			}
+		}
+	}
+
+	void execute() {
+		for (int i = (int)commd.size() - 1; i >= 0; i--) {
+			flag = 0;
+			exit_flag = 0;
+			commd.at(i)->execute();
+			if (exit_flag == 1) {//if current command is exit
+				break;
+			}
+		}
+	}
+
+};
+
 class Semicolon :public Base {
 protected:
 	vector<Base*> commd;
@@ -151,26 +274,34 @@ public:
 				continue;//skip space
 			}
 			temp = temp + *p;
-			if ((*q == ' ' || *q == ';' || *q == '\0' || *q == '#' || *q == '&' || *q == '|') && ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p >= '0' && *p <= '9') || *p == '\"')) {
+			if ((*q == ' ' || *q == ';' || *q == '\0' || *q == '#' || *q == '&' || *q == '|' || *q == ']' || *q == ')') && ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p >= '0' && *p <= '9') || *p == '\"' || *p == '[' || *p == ']')) {
 				//if the next charater is one of these, create a argument item in queue
 				Argumentqueue.push(temp);//push an argument into queue
 				temp = "";
 			}
+			if (*p == '[' && *q != ' ') {
+				if (temp == "[") {
+					Argumentqueue.push("[");//push "[" into queue
+					temp = "";
+				}		
+			}
 
 			if (*p == '\0' || *p == '#') {//this is the end of the whole input, or just meet with '#'
 				i = 0;
-
-				while (!Argumentqueue.empty()) {
-					argv1[cursor][i] = Argumentqueue.front();//put all arguments into one command space
-					i++;
-					Argumentqueue.pop();
+				if (!Argumentqueue.empty()) {
+					while (!Argumentqueue.empty()) {
+						argv1[cursor][i] = Argumentqueue.front();//put all arguments into one command space
+						i++;
+						Argumentqueue.pop();
+					}
+					for (int m = 0; m < i; m++) {
+						argv[cursor][m] = (char*)argv1[cursor][m].data();//change type from "string" to "char*"
+					}
+					argv[cursor][i] = NULL;
+					Base* singlecmd = new Command(argv[cursor]);//create a single command class 
+					Cmdstack.push(singlecmd);//
 				}
-				for (int m = 0; m < i; m++) {
-					argv[cursor][m] = (char*)argv1[cursor][m].data();//change type from "string" to "char*"
-				}
-				argv[cursor][i] = NULL;
-				Base* singlecmd = new Command(argv[cursor]);//create a single command class 
-				Cmdstack.push(singlecmd);//
+				
 
 				if (Symbolstack.empty())//there is no symbol left, means that we have already combined all single commands with "&&" or "||"
 				{
@@ -226,21 +357,92 @@ public:
 					}
 				}
 			}
+			if (*p == '(') {//if current character is '('
+				Symbolstack.push("(");
+				temp = "";
+			}
+			if (*p == ')') {
+				Parenthesis* paren = new Parenthesis();
+				i = 0;
 
+				if (!Argumentqueue.empty()) {
+					while (!Argumentqueue.empty()) {
+						argv1[cursor][i] = Argumentqueue.front();//put all arguments into one command space
+						i++;
+						Argumentqueue.pop();
+					}
+					for (int m = 0; m < i; m++) {
+						argv[cursor][m] = (char*)argv1[cursor][m].data();//change type from string to char*
+					}
+					argv[cursor][i] = NULL;
+					Base* singlecmd = new Command(argv[cursor]);//create a single command
+					Cmdstack.push(singlecmd);//add this command into stack
+				}
+				
+
+				if (Symbolstack.empty()) {
+					//there is no symbol in stack now
+					cout << "syntax error near unexpected token ')'" << endl;
+				}
+				else {
+					//there are symbols in stack now
+					while (!Symbolstack.empty()) {
+						string t = Symbolstack.top();
+						if (t == ";") {//the symbol on top of the stack is ';'
+							Symbolstack.pop();
+							paren->addNode(Cmdstack.top());
+							Cmdstack.pop();
+						}
+						if (t == "&&") {//the symbol on top of the stack is '&&'
+										//then create a "and" composition first
+							Symbolstack.pop();
+							Base* right = Cmdstack.top();
+							Cmdstack.pop();
+							Base* left = Cmdstack.top();
+							Cmdstack.pop();
+							Base* andcmd = new And(left, right);
+							Cmdstack.push(andcmd);
+						}
+						if (t == "||") {//the symbol on top of the stack is '||'
+										//then create a "or" composition first
+							Symbolstack.pop();
+							Base* right = Cmdstack.top();
+							Cmdstack.pop();
+							Base* left = Cmdstack.top();
+							Cmdstack.pop();
+							Base* orcmd = new Or(left, right);
+							Cmdstack.push(orcmd);
+						}
+						if (t == "(") {
+							Symbolstack.pop();
+							paren->addNode(Cmdstack.top());
+							Cmdstack.pop();
+							Cmdstack.push(paren);
+							break;
+						}
+					}
+				}
+				temp = "";//move on to next command
+				cursor++;
+				continue;
+			}
 			if (*p == ';') {//if current character is ';'
 
 				i = 0;
-				while (!Argumentqueue.empty()) {
-					argv1[cursor][i] = Argumentqueue.front();//put all arguments into one command space
-					i++;
-					Argumentqueue.pop();
+				if (!Argumentqueue.empty()) {
+					while (!Argumentqueue.empty()) {
+						argv1[cursor][i] = Argumentqueue.front();//put all arguments into one command space
+						i++;
+						Argumentqueue.pop();
+					}
+					for (int m = 0; m < i; m++) {
+						argv[cursor][m] = (char*)argv1[cursor][m].data();//change type from string to char*
+					}
+					argv[cursor][i] = NULL;
+					Base* singlecmd = new Command(argv[cursor]);//create a single command
+					Cmdstack.push(singlecmd);//add this command into stack
 				}
-				for (int m = 0; m < i; m++) {
-					argv[cursor][m] = (char*)argv1[cursor][m].data();//change type from string to char*
-				}
-				argv[cursor][i] = NULL;
-				Base* singlecmd = new Command(argv[cursor]);//create a single command
-				Cmdstack.push(singlecmd);//add this command into stack
+				
 
 				if (Symbolstack.empty()) {
 					//there is no symbol in stack now
@@ -283,17 +485,20 @@ public:
 				if (*q == '&') {
 					//we meet with '&&'
 					i = 0;
-					while (!Argumentqueue.empty()) {
-						argv1[cursor][i] = Argumentqueue.front();//put all arguments into one command space
-						i++;
-						Argumentqueue.pop();
+					if (!Argumentqueue.empty()) {
+						while (!Argumentqueue.empty()) {
+							argv1[cursor][i] = Argumentqueue.front();//put all arguments into one command space
+							i++;
+							Argumentqueue.pop();
+						}
+						for (int m = 0; m < i; m++) {
+							argv[cursor][m] = (char*)argv1[cursor][m].data();// change type from string to char*
+						}
+						argv[cursor][i] = NULL;
+						Base* singlecmd = new Command(argv[cursor]);//create a single command
+						Cmdstack.push(singlecmd);
 					}
-					for (int m = 0; m < i; m++) {
-						argv[cursor][m] = (char*)argv1[cursor][m].data();// change type from string to char*
-					}
-					argv[cursor][i] = NULL;
-					Base* singlecmd = new Command(argv[cursor]);//create a single command
-					Cmdstack.push(singlecmd);
+					
 
 					if (!Symbolstack.empty()) {//there are symbols in stack
 						string t = Symbolstack.top();
@@ -328,17 +533,20 @@ public:
 				if (*q == '|') {
 					//we meet with '||'
 					i = 0;
-					while (!Argumentqueue.empty()) {
-						argv1[cursor][i] = Argumentqueue.front();// put all arguments into one command
-						i++;
-						Argumentqueue.pop();
+					if (!Argumentqueue.empty()) {
+						while (!Argumentqueue.empty()) {
+							argv1[cursor][i] = Argumentqueue.front();// put all arguments into one command
+							i++;
+							Argumentqueue.pop();
+						}
+						for (int m = 0; m < i; m++) {
+							argv[cursor][m] = (char*)argv1[cursor][m].data();//change type from string to char*
+						}
+						argv[cursor][i] = NULL;
+						Base* singlecmd = new Command(argv[cursor]);//create a single command
+						Cmdstack.push(singlecmd);//add it into stack
 					}
-					for (int m = 0; m < i; m++) {
-						argv[cursor][m] = (char*)argv1[cursor][m].data();//change type from string to char*
-					}
-					argv[cursor][i] = NULL;
-					Base* singlecmd = new Command(argv[cursor]);//create a single command
-					Cmdstack.push(singlecmd);//add it into stack
+					
 
 					if (!Symbolstack.empty()) {//there are symbols in stack
 						string t = Symbolstack.top();
