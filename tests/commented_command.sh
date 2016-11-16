@@ -17,3 +17,10 @@ echo chang && echo #yy || ls -a
 git # status; echo gh
 th || #fffff
 #echo yuan
+test -e #yuan
+test -d #yuan
+test -f #yuan
+[ -e yuan #]
+[ -d #yuan ]
+(echo yuan && echo chang) #|| (echo u && echo c)
+

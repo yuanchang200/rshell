@@ -30,4 +30,18 @@ test -g yuan ]
 [-e yuan
 [-d yuan
 [-f yuan
+[ -e yuan chang ]
+[ -f yuan uyehfeu ]
+[ -g yuan dewhfuwe ]
+[ yuan fehfuwf ]
+[yuan hfuehf]
+[-e yuan esfefsf]
+[-d yuan sfefsfef]
+[-f yuan ehfuhwuef]
+test -d
+test -e
+test -f
+[ -e ]
+[ -f ]
+[ -d ]
 
