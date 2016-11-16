@@ -36,7 +36,7 @@ public:
 				
 					if (stat(argv[2], &sb) == -1)
 					{
-						perror("stat");
+//						perror("stat");
 					}
 					if (S_ISREG(sb.st_mode))//the argument is a file
 					{
@@ -58,7 +58,7 @@ public:
 				else if (strcmp(argv[1], "-d") == 0) {//test command with "-d"
 					if (stat(argv[2], &sb) == -1)
 					{
-						perror("stat");
+	//					perror("stat");
 					}
 					if (S_ISDIR(sb.st_mode))// the argument is a directory
 					{
@@ -80,7 +80,7 @@ public:
 				else if (strcmp(argv[1], "-e") == 0) {//test command with "-e"
 					if (stat(argv[2], &sb) == -1)
 					{
-						perror("stat");
+	//					perror("stat");
 					}
 					if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))//the argument exsists
 					{
@@ -106,7 +106,7 @@ public:
 			else {//test command without the argument "-", use default "-e"
 				if (stat(argv[1], &sb) == -1)
 				{
-					perror("stat");
+		//			perror("stat");
 				}
 				if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))//the argument exsists
 				{
