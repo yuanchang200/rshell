@@ -33,65 +33,46 @@ public:
 			struct stat sb;
 			if (*argv[1] == '-') {
 				if (strcmp(argv[1], "-f") == 0) {
-					int i = 2;
-					while ((strcmp(argv[i], "]") != 0) && (strcmp(argv[i], "\0") != 0)) {
-						if (stat(argv[i], &sb) == -1)
-						{
-							perror("stat");
-						}
-						if (S_ISREG(sb.st_mode))
-						{
-							cout << "(True)" << endl;
-						}
-						else {
-							cout << "(False)" << endl;
-						}
-						i++;
+				
+					if (stat(argv[2], &sb) == -1)
+					{
+						perror("stat");
+					}
+					if (S_ISREG(sb.st_mode))
+					{
+						cout << "(True)" << endl;
+					}
+					else {
+						cout << "(False)" << endl;
+					}
+					if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
+						cout << "syntax error near unexpected token '" << argv[3] << "'" << endl;
+					}
+					if (strcmp(argv[0], "[") == 0 && argv[3] == NULL) {
+						cout << "There should be a ']' after token " << argv[2] << endl;
 					}
 				}
 				else if (strcmp(argv[1], "-d") == 0) {
-					int i = 2;
-					while ((strcmp(argv[i], "]") != 0) && (strcmp(argv[i], "\0") != 0)) {
-						if (stat(argv[i], &sb) == -1)
-						{
-							perror("stat");
-						}
-						if (S_ISDIR(sb.st_mode))
-						{
-							cout << "(True)" << endl;
-						}
-						else {
-							cout << "(False)" << endl;
-						}
-						i++;
+					if (stat(argv[2], &sb) == -1)
+					{
+						perror("stat");
 					}
-					
+					if (S_ISDIR(sb.st_mode))
+					{
+						cout << "(True)" << endl;
+					}
+					else {
+						cout << "(False)" << endl;
+					}	
+					if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
+						cout << "syntax error near unexpected token '" << argv[3] << "'" << endl;
+					}
+					if (strcmp(argv[0], "[") == 0 && argv[3] == NULL) {
+						cout << "There should be a ']' after token " << argv[2] << endl;
+					}
 				}
 				else if (strcmp(argv[1], "-e") == 0) {
-					int i = 2;
-					while ((strcmp(argv[i], "]") != 0) && (strcmp(argv[i], "\0") != 0)) {
-						if (stat(argv[i], &sb) == -1)
-						{
-							perror("stat");
-						}
-						if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))
-						{
-							cout << "(True)" << endl;
-						}
-						else {
-							cout << "(False)" << endl;
-						}
-						i++;
-					}	
-				}
-				else {
-					cout << "\"" << argv[1] << "\"" << "can not be identified" << endl;
-				}
-			}
-			else {
-				int i = 1;
-				while ((strcmp(argv[i], "]") != 0) && (strcmp(argv[i], "\0") != 0)) {
-					if (stat(argv[i], &sb) == -1)
+					if (stat(argv[2], &sb) == -1)
 					{
 						perror("stat");
 					}
@@ -102,7 +83,35 @@ public:
 					else {
 						cout << "(False)" << endl;
 					}
-					i++;
+
+					if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
+						cout << "syntax error near unexpected token '" << argv[3] << "'" << endl;
+					}
+					if (strcmp(argv[0], "[") == 0 && argv[3] == NULL) {
+						cout << "There should be a ']' after token " << argv[2] << endl;
+					}
+				}
+				else {
+					cout << "\"" << argv[1] << "\"" << "can not be identified" << endl;
+				}
+			}
+			else {
+				if (stat(argv[1], &sb) == -1)
+				{
+					perror("stat");
+				}
+				if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))
+				{
+					cout << "(True)" << endl;
+				}
+				else {
+					cout << "(False)" << endl;
+				}
+				if ((strcmp(argv[0], "[") == 0 && argv[2] != NULL && strcmp(argv[2], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[2] != NULL)) {
+					cout << "syntax error near unexpected token '" << argv[2] << "'" << endl;
+				}
+				if (strcmp(argv[0], "[") == 0 && argv[2] == NULL) {
+					cout << "There should be a ']' after token " << argv[1] << endl;
 				}
 			}
 		}
