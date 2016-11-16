@@ -29,87 +29,98 @@ class Executor {
 public:
 	void execute(char *argv[]) {
 
-		if (strcmp(argv[0], "test") == 0 || strcmp(argv[0], "[") == 0) {
+		if (strcmp(argv[0], "test") == 0 || strcmp(argv[0], "[") == 0) {//test command starts with "test" and "["
 			struct stat sb;
-			if (*argv[1] == '-') {
-				if (strcmp(argv[1], "-f") == 0) {
+			if (*argv[1] == '-') {//test command with argument "-e" "-f" or "-d"
+				if (strcmp(argv[1], "-f") == 0) {//test command with "-f"
 				
 					if (stat(argv[2], &sb) == -1)
 					{
 						perror("stat");
 					}
-					if (S_ISREG(sb.st_mode))
+					if (S_ISREG(sb.st_mode))//the argument is a file
 					{
 						cout << "(True)" << endl;
 					}
 					else {
 						cout << "(False)" << endl;
 					}
+					//start with "[" but the number of arguments is more than 1, give an error information
+					// or start with "test" but the number of arguments is more than 1, give an error information
 					if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
 						cout << "syntax error near unexpected token '" << argv[3] << "'" << endl;
 					}
+					//start with "[" but lack "]"
 					if (strcmp(argv[0], "[") == 0 && argv[3] == NULL) {
 						cout << "There should be a ']' after token " << argv[2] << endl;
 					}
 				}
-				else if (strcmp(argv[1], "-d") == 0) {
+				else if (strcmp(argv[1], "-d") == 0) {//test command with "-d"
 					if (stat(argv[2], &sb) == -1)
 					{
 						perror("stat");
 					}
-					if (S_ISDIR(sb.st_mode))
+					if (S_ISDIR(sb.st_mode))// the argument is a directory
 					{
 						cout << "(True)" << endl;
 					}
 					else {
 						cout << "(False)" << endl;
 					}	
+					//start with "[" but the number of arguments is more than 1, give an error information
+					// or start with "test" but the number of arguments is more than 1, give an error information
 					if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
 						cout << "syntax error near unexpected token '" << argv[3] << "'" << endl;
 					}
+					//start with "[" but lack "]"
 					if (strcmp(argv[0], "[") == 0 && argv[3] == NULL) {
 						cout << "There should be a ']' after token " << argv[2] << endl;
 					}
 				}
-				else if (strcmp(argv[1], "-e") == 0) {
+				else if (strcmp(argv[1], "-e") == 0) {//test command with "-e"
 					if (stat(argv[2], &sb) == -1)
 					{
 						perror("stat");
 					}
-					if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))
+					if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))//the argument exsists
 					{
 						cout << "(True)" << endl;
 					}
 					else {
 						cout << "(False)" << endl;
 					}
-
+					//start with "[" but the number of arguments is more than 1, give an error information
+					// or start with "test" but the number of arguments is more than 1, give an error information
 					if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
 						cout << "syntax error near unexpected token '" << argv[3] << "'" << endl;
 					}
+					//start with "[" but lack "]"
 					if (strcmp(argv[0], "[") == 0 && argv[3] == NULL) {
 						cout << "There should be a ']' after token " << argv[2] << endl;
 					}
 				}
-				else {
+				else {//the argument with "-" is not one of "-e" "-d" and "-f", give an error information
 					cout << "\"" << argv[1] << "\"" << "can not be identified" << endl;
 				}
 			}
-			else {
+			else {//test command without the argument "-", use default "-e"
 				if (stat(argv[1], &sb) == -1)
 				{
 					perror("stat");
 				}
-				if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))
+				if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))//the argument exsists
 				{
 					cout << "(True)" << endl;
 				}
 				else {
 					cout << "(False)" << endl;
 				}
+				//start with "[" but the number of arguments is more than 1, give an error information
+				// or start with "test" but the number of arguments is more than 1, give an error information
 				if ((strcmp(argv[0], "[") == 0 && argv[2] != NULL && strcmp(argv[2], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[2] != NULL)) {
 					cout << "syntax error near unexpected token '" << argv[2] << "'" << endl;
 				}
+				//start with "[" but lack "]"
 				if (strcmp(argv[0], "[") == 0 && argv[2] == NULL) {
 					cout << "There should be a ']' after token " << argv[1] << endl;
 				}
@@ -208,7 +219,7 @@ public:
 	}
 };
 
-class Parenthesis :public Base {
+class Parenthesis :public Base {//the composition of "()"
 protected:
 	vector<Base*> commd;
 public:
@@ -390,7 +401,7 @@ public:
 				
 
 				if (Symbolstack.empty()) {
-					//there is no symbol in stack now
+					//there is no "(" but has ")"
 					cout << "syntax error near unexpected token ')'" << endl;
 				}
 				else {
@@ -422,7 +433,7 @@ public:
 							Base* orcmd = new Or(left, right);
 							Cmdstack.push(orcmd);
 						}
-						if (t == "(") {
+						if (t == "(") {//complete the "()" structure
 							Symbolstack.pop();
 							paren->addNode(Cmdstack.top());
 							Cmdstack.pop();
