@@ -31,56 +31,103 @@ public:
 
 		if (strcmp(argv[0], "test") == 0 || strcmp(argv[0], "[") == 0) {//test command starts with "test" and "["
 			struct stat sb;
-			if (*argv[1] == '-') {//test command with argument "-e" "-f" or "-d"
-				if (strcmp(argv[1], "-f") == 0) {//test command with "-f"
-				
-					if (stat(argv[2], &sb) == -1)
-					{
-//						perror("stat");
+			if (strcmp(argv[0], "[") == 0 && argv[1] == NULL) {
+				cout << "syntax error near unexpected token '['" << endl;
+			}
+			else if(strcmp(argv[0], "test") == 0 && argv[1] == NULL) {
+				cout << "expect file or directory name after \"test\"" << endl;
+			}
+			else {
+				if (*argv[1] == '-') {//test command with argument "-e" "-f" or "-d"
+					if (strcmp(argv[1], "-f") == 0) {//test command with "-f"
+						if (argv[2] == NULL) {
+							cout << "expect file or directory name after \"-f\"" << endl;
+						}
+						else {
+							if (stat(argv[2], &sb) == -1)
+							{
+								//						perror("stat");
+							}
+							if (S_ISREG(sb.st_mode))//the argument is a file
+							{
+								cout << "(True)" << endl;
+							}
+							else {
+								cout << "(False)" << endl;
+							}
+							//start with "[" but the number of arguments is more than 1, give an error information
+							// or start with "test" but the number of arguments is more than 1, give an error information
+							if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
+								cout << "syntax error near unexpected token '" << argv[3] << "'" << endl;
+							}
+							//start with "[" but lack "]"
+							if (strcmp(argv[0], "[") == 0 && argv[3] == NULL) {
+								cout << "There should be a ']' after token " << argv[2] << endl;
+							}
+						}
 					}
-					if (S_ISREG(sb.st_mode))//the argument is a file
-					{
-						cout << "(True)" << endl;
+					else if (strcmp(argv[1], "-d") == 0) {//test command with "-d"
+						if (argv[2] == NULL) {
+							cout << "expect file or directory name after \"-d\"" << endl;
+						}
+						else {
+							if (stat(argv[2], &sb) == -1)
+							{
+								//					perror("stat");
+							}
+							if (S_ISDIR(sb.st_mode))// the argument is a directory
+							{
+								cout << "(True)" << endl;
+							}
+							else {
+								cout << "(False)" << endl;
+							}
+							//start with "[" but the number of arguments is more than 1, give an error information
+							// or start with "test" but the number of arguments is more than 1, give an error information
+							if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
+								cout << "syntax error near unexpected token '" << argv[3] << "'" << endl;
+							}
+							//start with "[" but lack "]"
+							if (strcmp(argv[0], "[") == 0 && argv[3] == NULL) {
+								cout << "There should be a ']' after token " << argv[2] << endl;
+							}
+						}
 					}
-					else {
-						cout << "(False)" << endl;
+					else if (strcmp(argv[1], "-e") == 0) {//test command with "-e"
+						if (argv[2] == NULL) {
+							cout << "expect file or directory name after \"-e\"" << endl;
+						}
+						else {
+							if (stat(argv[2], &sb) == -1)
+							{
+								//					perror("stat");
+							}
+							if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))//the argument exsists
+							{
+								cout << "(True)" << endl;
+							}
+							else {
+								cout << "(False)" << endl;
+							}
+							//start with "[" but the number of arguments is more than 1, give an error information
+							// or start with "test" but the number of arguments is more than 1, give an error information
+							if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
+								cout << "syntax error near unexpected token '" << argv[3] << "'" << endl;
+							}
+							//start with "[" but lack "]"
+							if (strcmp(argv[0], "[") == 0 && argv[3] == NULL) {
+								cout << "There should be a ']' after token " << argv[2] << endl;
+							}
+						}
 					}
-					//start with "[" but the number of arguments is more than 1, give an error information
-					// or start with "test" but the number of arguments is more than 1, give an error information
-					if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
-						cout << "syntax error near unexpected token '" << argv[3] << "'" << endl;
-					}
-					//start with "[" but lack "]"
-					if (strcmp(argv[0], "[") == 0 && argv[3] == NULL) {
-						cout << "There should be a ']' after token " << argv[2] << endl;
+					else {//the argument with "-" is not one of "-e" "-d" and "-f", give an error information
+						cout << "\"" << argv[1] << "\"" << "can not be identified" << endl;
 					}
 				}
-				else if (strcmp(argv[1], "-d") == 0) {//test command with "-d"
-					if (stat(argv[2], &sb) == -1)
+				else {//test command without the argument "-", use default "-e"
+					if (stat(argv[1], &sb) == -1)
 					{
-	//					perror("stat");
-					}
-					if (S_ISDIR(sb.st_mode))// the argument is a directory
-					{
-						cout << "(True)" << endl;
-					}
-					else {
-						cout << "(False)" << endl;
-					}	
-					//start with "[" but the number of arguments is more than 1, give an error information
-					// or start with "test" but the number of arguments is more than 1, give an error information
-					if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
-						cout << "syntax error near unexpected token '" << argv[3] << "'" << endl;
-					}
-					//start with "[" but lack "]"
-					if (strcmp(argv[0], "[") == 0 && argv[3] == NULL) {
-						cout << "There should be a ']' after token " << argv[2] << endl;
-					}
-				}
-				else if (strcmp(argv[1], "-e") == 0) {//test command with "-e"
-					if (stat(argv[2], &sb) == -1)
-					{
-	//					perror("stat");
+						//			perror("stat");
 					}
 					if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))//the argument exsists
 					{
@@ -91,40 +138,16 @@ public:
 					}
 					//start with "[" but the number of arguments is more than 1, give an error information
 					// or start with "test" but the number of arguments is more than 1, give an error information
-					if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
-						cout << "syntax error near unexpected token '" << argv[3] << "'" << endl;
+					if ((strcmp(argv[0], "[") == 0 && argv[2] != NULL && strcmp(argv[2], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[2] != NULL)) {
+						cout << "syntax error near unexpected token '" << argv[2] << "'" << endl;
 					}
 					//start with "[" but lack "]"
-					if (strcmp(argv[0], "[") == 0 && argv[3] == NULL) {
-						cout << "There should be a ']' after token " << argv[2] << endl;
+					if (strcmp(argv[0], "[") == 0 && argv[2] == NULL) {
+						cout << "There should be a ']' after token " << argv[1] << endl;
 					}
 				}
-				else {//the argument with "-" is not one of "-e" "-d" and "-f", give an error information
-					cout << "\"" << argv[1] << "\"" << "can not be identified" << endl;
-				}
 			}
-			else {//test command without the argument "-", use default "-e"
-				if (stat(argv[1], &sb) == -1)
-				{
-		//			perror("stat");
-				}
-				if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))//the argument exsists
-				{
-					cout << "(True)" << endl;
-				}
-				else {
-					cout << "(False)" << endl;
-				}
-				//start with "[" but the number of arguments is more than 1, give an error information
-				// or start with "test" but the number of arguments is more than 1, give an error information
-				if ((strcmp(argv[0], "[") == 0 && argv[2] != NULL && strcmp(argv[2], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[2] != NULL)) {
-					cout << "syntax error near unexpected token '" << argv[2] << "'" << endl;
-				}
-				//start with "[" but lack "]"
-				if (strcmp(argv[0], "[") == 0 && argv[2] == NULL) {
-					cout << "There should be a ']' after token " << argv[1] << endl;
-				}
-			}
+			
 		}
 		else {
 			int child_ret;
