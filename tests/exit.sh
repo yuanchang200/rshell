@@ -15,3 +15,8 @@ echo yuan; echo chang; exit
 echo yuan #exit
 echo yuanexit
 ls -a || exit && ls -l && exit; exit || echo yuan || echo chang && exit;
+test yuan && exit
+exit && test yuan
+test yuan || echo u && exit
+(echo yuan && exit) || (echo u && echo i)
+
