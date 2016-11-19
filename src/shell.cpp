@@ -30,7 +30,7 @@ public:
 	void execute(char *argv[]) {
 
 		if (strcmp(argv[0], "test") == 0 || strcmp(argv[0], "[") == 0) {//test command starts with "test" and "["
-			struct stat sb;
+//			struct stat sb;
 			if (strcmp(argv[0], "[") == 0 && argv[1] == NULL) {
 				cout << "syntax error near unexpected token '['" << endl;
 			}
@@ -44,10 +44,8 @@ public:
 							cout << "expect file or directory name after \"-f\"" << endl;
 						}
 						else {
-							if (stat(argv[2], &sb) == -1)
-							{
-								//						perror("stat");
-							}
+							struct stat sb;
+							stat(argv[2], &sb);
 							if (S_ISREG(sb.st_mode))//the argument is a file
 							{
 								cout << "(True)" << endl;
@@ -55,6 +53,7 @@ public:
 							else {
 								cout << "(False)" << endl;
 							}
+							sb.st_mode = 0;
 							//start with "[" but the number of arguments is more than 1, give an error information
 							// or start with "test" but the number of arguments is more than 1, give an error information
 							if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
@@ -71,10 +70,8 @@ public:
 							cout << "expect file or directory name after \"-d\"" << endl;
 						}
 						else {
-							if (stat(argv[2], &sb) == -1)
-							{
-								//					perror("stat");
-							}
+							struct stat sb;
+							stat(argv[2], &sb);
 							if (S_ISDIR(sb.st_mode))// the argument is a directory
 							{
 								cout << "(True)" << endl;
@@ -82,6 +79,7 @@ public:
 							else {
 								cout << "(False)" << endl;
 							}
+							sb.st_mode = 0;
 							//start with "[" but the number of arguments is more than 1, give an error information
 							// or start with "test" but the number of arguments is more than 1, give an error information
 							if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
@@ -98,10 +96,8 @@ public:
 							cout << "expect file or directory name after \"-e\"" << endl;
 						}
 						else {
-							if (stat(argv[2], &sb) == -1)
-							{
-								//					perror("stat");
-							}
+							struct stat sb;
+							stat(argv[2], &sb);
 							if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))//the argument exsists
 							{
 								cout << "(True)" << endl;
@@ -109,6 +105,7 @@ public:
 							else {
 								cout << "(False)" << endl;
 							}
+							sb.st_mode = 0;
 							//start with "[" but the number of arguments is more than 1, give an error information
 							// or start with "test" but the number of arguments is more than 1, give an error information
 							if ((strcmp(argv[0], "[") == 0 && argv[3] != NULL && strcmp(argv[3], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[3] != NULL)) {
@@ -125,10 +122,8 @@ public:
 					}
 				}
 				else {//test command without the argument "-", use default "-e"
-					if (stat(argv[1], &sb) == -1)
-					{
-						//			perror("stat");
-					}
+					struct stat sb;
+					stat(argv[1], &sb);
 					if (S_ISDIR(sb.st_mode) || S_ISREG(sb.st_mode))//the argument exsists
 					{
 						cout << "(True)" << endl;
@@ -136,6 +131,7 @@ public:
 					else {
 						cout << "(False)" << endl;
 					}
+					sb.st_mode = 0;
 					//start with "[" but the number of arguments is more than 1, give an error information
 					// or start with "test" but the number of arguments is more than 1, give an error information
 					if ((strcmp(argv[0], "[") == 0 && argv[2] != NULL && strcmp(argv[2], "]") != 0) || (strcmp(argv[0], "test") == 0 && argv[2] != NULL)) {

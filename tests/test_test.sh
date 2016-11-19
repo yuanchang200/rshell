@@ -52,4 +52,15 @@ test -f
 [ -f
 [ -d
 test
+test yuan && test chang
+test chang || test yuan
+test yuan; test u; test i
+test -e yuan && test -f yuan && test -d yuan
+[ yuan ] && [chang]
+[ yuan ] || [chang]
+[ yuan] ; [chang]
+[ -e yuan ] &&[ -e chang] && [-e u ]
+[ -d yuan ] &&[-d chang] && [-d u]
+[ -e yuan ] || [ -d yuan ]
+[ -e yuan ]; [ -e chang ]; [ -d u ]
 
