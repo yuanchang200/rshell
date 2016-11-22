@@ -25,6 +25,83 @@ using namespace std;
 
 int flag = 0;//flag = 0 means a single command is executed successfully.
 int exit_flag = 0;//This is for command "exit" appeared in a composition, exit_flag = 1 means it's time to exit
+class Directories {
+private:
+	int history_index;
+	vector<string> history;
+public:
+	Directories() {
+		//set up members
+		history_index = -1;
+	}
+	bool initialized() {
+		if (history_index > 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	void add_dir(string dir) {
+		//add a directory to the vector
+		//change environment variables PWD and OLDPWD
+		history.push_back(dir);
+		history_index++;
+		string pre_dir;
+		string cur_dir = history.at(history_index);
+		if (this->initialized()) {
+			pre_dir = history.at(history_index - 1);
+		}
+		else {
+			pre_dir = history.at(history_index);
+		}
+		char* cur_path;
+		char* pre_path;
+		const int len_pre = pre_dir.length();
+		const int len_cur = cur_dir.length();
+		pre_path = new char[len_pre + 1];
+		cur_path = new char[len_cur + 1];
+		strcpy(pre_path, pre_dir.c_str());
+		strcpy(cur_path, cur_dir.c_str());
+		setenv("PWD", cur_path, 1);//set PWD
+		setenv("OLDPWD", pre_path, 1);//set OLDPWD
+	}
+	string get_dir() {
+		return history.at(history_index);
+	}
+	void changeto_pre() {
+		//change the currentworking directory to the previous working directory
+		if (this->initialized()) {
+			string cur_dir = history.at(history_index - 1);
+			string pre_dir;
+			if (history_index > 1) {
+				pre_dir = history.at(history_index - 2);
+			}
+			else {
+				pre_dir = history.at(history_index - 1);
+			}
+			char* cur_path;
+			char* pre_path;
+			const int len_pre = pre_dir.length();
+			const int len_cur = cur_dir.length();
+			pre_path = new char[len_pre + 1];
+			cur_path = new char[len_cur + 1];
+			strcpy(pre_path, pre_dir.c_str());
+			strcpy(cur_path, cur_dir.c_str());
+
+			chdir(cur_path);//change the working directory
+			setenv("PWD", cur_path, 1);//set PWD
+			setenv("OLDPWD", pre_path, 1);//set OLDPWD
+			history.erase(history.begin() + history_index);
+			history_index--;
+		}
+		else {
+			cout << "error: this is the first directory" << endl;
+		}
+	}
+};
+
+Directories* directories = new Directories();
 class Executor {
 public:
 	void execute(char *argv[]) {
@@ -144,6 +221,35 @@ public:
 				}
 			}
 			
+		}
+		else if (strcmp(argv[0], "cd") == 0) {//cd command
+			if (argv[1] != NULL) {
+				if (strcmp(argv[1], "-") == 0) {//command "cd -"
+					directories->changeto_pre();
+					if (argv[2] != NULL) {
+						cout << "syntax error near unexpected token '" << argv[2] << endl;
+					}
+				}
+				else {
+					if (chdir(argv[1]) == -1) {//change current working directory
+						perror("Can not find the directory");
+					}
+					else {
+						char* cur_path = NULL;
+						cur_path = getcwd(NULL, 0);//get current working directory
+						string cur_dir(cur_path);
+						directories->add_dir(cur_dir);//add current working directory to vector
+						free(cur_path);
+					}
+					if (argv[2] != NULL) {
+						cout << "syntax error near unexpected token '" << argv[2] << endl;
+					}
+				}
+			}
+			else {
+				chdir("/home");
+				directories->add_dir("/home");
+			}
 		}
 		else {
 			int child_ret;
@@ -313,7 +419,7 @@ public:
 				continue;//skip space
 			}
 			temp = temp + *p;
-			if ((*q == ' ' || *q == ';' || *q == '\0' || *q == '#' || *q == '&' || *q == '|' || *q == ']' || *q == ')') && ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p >= '0' && *p <= '9') || *p == '\"' || *p == '[' || *p == ']')) {
+			if ((*q == ' ' || *q == ';' || *q == '\0' || *q == '#' || *q == '&' || *q == '|' || *q == ']' || *q == ')') && ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p >= '0' && *p <= '9') || *p == '\"' || *p == '[' || *p == ']' || *p == '-')) {
 				//if the next charater is one of these, create a argument item in queue
 				Argumentqueue.push(temp);//push an argument into queue
 				temp = "";
@@ -620,12 +726,21 @@ public:
 int main()
 {
 	char inputBuffer[1000];
+
+	char* first_dir = getenv("PWD");
+	string first(first_dir);
+	directories->add_dir(first);//add the first directory to vector
 	while (1) {
 		int i = 0;
 
 		for (int j = 0; j < 1000; j++) {
 			inputBuffer[j] = '\0';
 		}//initialize inputBuffer
+		cout << "[";
+//--------get environment variable PWD-----------
+		char* cur_dire = getenv("PWD");
+		cout << cur_dire << "]";
+//-------------------------------------------------
 		cout << "$" << " ";
 		cin.getline(inputBuffer, 500);//get input
 
