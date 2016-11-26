@@ -15,7 +15,7 @@ This is a command shell written by C++， which can read in one or several comma
 <a name="Instrcutions"></a>
 ##Instructions
 
-User can input single command like "ls -a" and "mkdir test". User can also input combined commands with "&&", "||" or ";" like: echo chang && echo yuan || mkdir test; ls -a && git status. When using the command "test", user have three flags: -e, -f, -d. Other flags will not be recognized. And user can also use "[ dir ]" or "[ -e dir ]" as command "test". Also, when execute multi-commands, user may use "()" to change the precedence of commands. ATTENTION: the cd command may not work well.
+User can input single command like "ls -a" and "mkdir test". User can also input combined commands with "&&", "||" or ";" like: echo chang && echo yuan || mkdir test; ls -a && git status. When using the command "test", user have three flags: -e, -f, -d. Other flags will not be recognized. And user can also use "[ dir ]" or "[ -e dir ]" as command "test". Also, when execute multi-commands, user may use "()" to change the precedence of commands. And command "cd" works well now. "cd -" will change the current working directory to the previous working directory, "cd <path>" will change the current working directory to <path>, and "cd" will change the current working directory to the user's home directory.
 
 <a name="Project Introduction"></a>
 ##Project Introduction

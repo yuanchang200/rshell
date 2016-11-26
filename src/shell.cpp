@@ -55,6 +55,7 @@ public:
 		else {
 			pre_dir = history.at(history_index);
 		}
+		//change type from string to char*
 		char* cur_path;
 		char* pre_path;
 		const int len_pre = pre_dir.length();
@@ -230,7 +231,7 @@ public:
 						cout << "syntax error near unexpected token '" << argv[2] << endl;
 					}
 				}
-				else {
+				else {//command cd <path>
 					if (chdir(argv[1]) == -1) {//change current working directory
 						perror("Can not find the directory");
 					}
@@ -246,7 +247,7 @@ public:
 					}
 				}
 			}
-			else {
+			else {//command cd 
 				chdir("/home");
 				directories->add_dir("/home");
 			}
